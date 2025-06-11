@@ -11,6 +11,7 @@ import com.projects.projectmanager.project_manager.security.UserDetailsServiceIm
 import com.projects.projectmanager.project_manager.services.impl.UserEntityService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,10 +31,23 @@ public class UserEntityController {
         this.userService = userService;
     }
 
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<List<UserEntityDTO>>> getAllUserEntity() {
+//        List<UserEntityDTO> listUserEntity = service.findAll();
+//        return ResponseEntity.ok(new ApiResponse<>("Users retrieved successfully", listUserEntity, HttpStatus.OK));
+//    }
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserEntityDTO>>> getAllUserEntity() {
-        List<UserEntityDTO> listUserEntity = service.findAll();
-        return ResponseEntity.ok(new ApiResponse<>("Users retrieved successfully", listUserEntity, HttpStatus.OK));
+    public ResponseEntity<ApiResponse<Page<UserEntityDTO>>> getAllUserEntity(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<UserEntityDTO> usersPage = service.findAll(page, size);
+        ApiResponse<Page<UserEntityDTO>> response = new ApiResponse<>(
+                "Users retrieved successfully",
+                usersPage, HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

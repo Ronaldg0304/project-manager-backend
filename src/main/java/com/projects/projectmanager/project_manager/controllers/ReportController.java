@@ -9,6 +9,7 @@ import com.projects.projectmanager.project_manager.errors.ResourceNotFoundExcept
 import com.projects.projectmanager.project_manager.services.impl.ReportService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +27,23 @@ public class ReportController {
         this.service = service;
     }
 
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<List<ReportDTO>>> getAllReports() {
+//        List<ReportDTO> listReportDTO = service.findAll();
+//        return ResponseEntity.ok(new ApiResponse<>("Reports retrieved successfully", listReportDTO, HttpStatus.OK));
+//    }
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ReportDTO>>> getAllReports() {
-        List<ReportDTO> listReportDTO = service.findAll();
-        return ResponseEntity.ok(new ApiResponse<>("Reports retrieved successfully", listReportDTO, HttpStatus.OK));
+    public ResponseEntity<ApiResponse<Page<ReportDTO>>> getAllReports(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ReportDTO> reportsPage = service.findAll(page, size);
+        ApiResponse<Page<ReportDTO>> response = new ApiResponse<>(
+                "Reports retrieved successfully",
+                reportsPage, HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

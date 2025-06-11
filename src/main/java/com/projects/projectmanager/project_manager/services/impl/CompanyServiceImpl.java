@@ -1,10 +1,13 @@
 package com.projects.projectmanager.project_manager.services.impl;
 
 import com.projects.projectmanager.project_manager.dto.CompanyDTO;
+import com.projects.projectmanager.project_manager.dto.ProjectDTO;
 import com.projects.projectmanager.project_manager.entities.Company;
+import com.projects.projectmanager.project_manager.entities.Project;
 import com.projects.projectmanager.project_manager.errors.ResourceNotFoundException;
 import com.projects.projectmanager.project_manager.mappers.CompanyMapper;
 import com.projects.projectmanager.project_manager.repositories.CompanyRepository;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +25,14 @@ public class CompanyServiceImpl implements CompanyService {
         this.mapper = mapper;
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<CompanyDTO> findAll() {
-        List<Company> companyList = (List<Company>) repository.findAll();
-        return companyList.stream()
-                .map(mapper::toDTO)
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<CompanyDTO> findAll() {
+//        List<Company> companyList = (List<Company>) repository.findAll();
+//        return companyList.stream()
+//                .map(mapper::toDTO)
+//                .toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -67,5 +70,19 @@ public class CompanyServiceImpl implements CompanyService {
         }
         repository.deleteById(id);
         return optionalCompany.map(mapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<CompanyDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Company> companies = repository.findAll(pageable);
+
+        List<CompanyDTO> content = companies.getContent().stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return new PageImpl<>(content, pageable, companies.getTotalElements());
     }
 }

@@ -1,7 +1,5 @@
 package com.projects.projectmanager.project_manager.entities;
 
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.projects.projectmanager.project_manager.entities.audit.Auditable;
 import com.projects.projectmanager.project_manager.entities.enums.EState;
 import jakarta.persistence.*;

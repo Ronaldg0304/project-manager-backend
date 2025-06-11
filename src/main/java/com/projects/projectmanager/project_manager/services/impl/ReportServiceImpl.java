@@ -1,5 +1,6 @@
 package com.projects.projectmanager.project_manager.services.impl;
 
+import com.projects.projectmanager.project_manager.dto.ProjectDTO;
 import com.projects.projectmanager.project_manager.dto.ReportDTO;
 import com.projects.projectmanager.project_manager.entities.Project;
 import com.projects.projectmanager.project_manager.entities.Report;
@@ -9,6 +10,7 @@ import com.projects.projectmanager.project_manager.mappers.ReportMapper;
 import com.projects.projectmanager.project_manager.repositories.ProjectRepository;
 import com.projects.projectmanager.project_manager.repositories.ReportRepository;
 import com.projects.projectmanager.project_manager.repositories.UserEntityRepository;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,14 +32,14 @@ public class ReportServiceImpl implements ReportService{
         this.userEntityRepository = userEntityRepository;
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<ReportDTO> findAll() {
-        List<Report> reportsList = (List<Report>) repository.findAll();
-        return reportsList.stream()
-                .map(mapper::toDTO)
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<ReportDTO> findAll() {
+//        List<Report> reportsList = (List<Report>) repository.findAll();
+//        return reportsList.stream()
+//                .map(mapper::toDTO)
+//                .toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -70,5 +72,19 @@ public class ReportServiceImpl implements ReportService{
         }
         repository.deleteById(id);
         return optionalReport.map(mapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<ReportDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("reportDate").descending());
+
+        Page<Report> reports = repository.findAll(pageable);
+
+        List<ReportDTO> content = reports.getContent().stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return new PageImpl<>(content, pageable, reports.getTotalElements());
     }
 }

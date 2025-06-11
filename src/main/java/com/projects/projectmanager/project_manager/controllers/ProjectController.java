@@ -6,6 +6,7 @@ import com.projects.projectmanager.project_manager.errors.ResourceNotFoundExcept
 import com.projects.projectmanager.project_manager.services.impl.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +23,23 @@ public class ProjectController {
         this.service = service;
     }
 
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<List<ProjectDTO>>> getAllProjects() {
+//        List<ProjectDTO> listProjectDTO = service.findAll();
+//        return ResponseEntity.ok(new ApiResponse<>("Projects retrieved successfully", listProjectDTO, HttpStatus.OK));
+//    }
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProjectDTO>>> getAllProjects() {
-        List<ProjectDTO> listProjectDTO = service.findAll();
-        return ResponseEntity.ok(new ApiResponse<>("Projects retrieved successfully", listProjectDTO, HttpStatus.OK));
+    public ResponseEntity<ApiResponse<Page<ProjectDTO>>> getAllProjects(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ProjectDTO> projectsPage = service.findAll(page, size);
+        ApiResponse<Page<ProjectDTO>> response = new ApiResponse<>(
+                "Projects retrieved successfully",
+                projectsPage, HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping

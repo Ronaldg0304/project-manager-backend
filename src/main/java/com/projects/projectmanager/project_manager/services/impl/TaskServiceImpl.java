@@ -1,6 +1,7 @@
 package com.projects.projectmanager.project_manager.services.impl;
 
 import com.projects.projectmanager.project_manager.dto.CompanyDTO;
+import com.projects.projectmanager.project_manager.dto.ProjectDTO;
 import com.projects.projectmanager.project_manager.dto.TaskDTO;
 import com.projects.projectmanager.project_manager.entities.Company;
 import com.projects.projectmanager.project_manager.entities.Project;
@@ -11,6 +12,7 @@ import com.projects.projectmanager.project_manager.mappers.TaskMapper;
 import com.projects.projectmanager.project_manager.repositories.ProjectRepository;
 import com.projects.projectmanager.project_manager.repositories.TaskRepository;
 import com.projects.projectmanager.project_manager.repositories.UserEntityRepository;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,14 +34,14 @@ public class TaskServiceImpl implements TaskService{
         this.userEntityRepository = userEntityRepository;
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<TaskDTO> findAll() {
-        List<Task> taskList = (List<Task>) repository.findAll();
-        return taskList.stream()
-                .map(mapper::toDTO)
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<TaskDTO> findAll() {
+//        List<Task> taskList = (List<Task>) repository.findAll();
+//        return taskList.stream()
+//                .map(mapper::toDTO)
+//                .toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -79,5 +81,19 @@ public class TaskServiceImpl implements TaskService{
         }
         repository.deleteById(id);
         return optionalTask.map(mapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<TaskDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Task> tasks = repository.findAll(pageable);
+
+        List<TaskDTO> content = tasks.getContent().stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return new PageImpl<>(content, pageable, tasks.getTotalElements());
     }
 }

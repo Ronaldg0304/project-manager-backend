@@ -1,7 +1,9 @@
 package com.projects.projectmanager.project_manager.services.impl;
 
+import com.projects.projectmanager.project_manager.dto.ProjectDTO;
 import com.projects.projectmanager.project_manager.dto.TaskDTO;
 import com.projects.projectmanager.project_manager.dto.UserEntityDTO;
+import com.projects.projectmanager.project_manager.entities.Project;
 import com.projects.projectmanager.project_manager.entities.Task;
 import com.projects.projectmanager.project_manager.entities.UserEntity;
 import com.projects.projectmanager.project_manager.errors.ResourceNotFoundException;
@@ -10,6 +12,7 @@ import com.projects.projectmanager.project_manager.repositories.UserEntityReposi
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,14 +36,14 @@ public class UserEntityServiceImpl implements UserEntityService{
         this.mapper = mapper;
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<UserEntityDTO> findAll() {
-       List<UserEntity> userEntityList = (List<UserEntity>) repository.findAll();
-       return userEntityList.stream()
-               .map(mapper::toDTO)
-               .toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<UserEntityDTO> findAll() {
+//       List<UserEntity> userEntityList = (List<UserEntity>) repository.findAll();
+//       return userEntityList.stream()
+//               .map(mapper::toDTO)
+//               .toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -91,6 +94,19 @@ public class UserEntityServiceImpl implements UserEntityService{
         return repository.findByDocumentId(id).map(mapper::toDTO);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserEntityDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<UserEntity> users = repository.findAll(pageable);
+
+        List<UserEntityDTO> content = users.getContent().stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return new PageImpl<>(content, pageable, users.getTotalElements());
+    }
 
 
 

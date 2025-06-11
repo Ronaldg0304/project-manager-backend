@@ -1,7 +1,10 @@
 package com.projects.projectmanager.project_manager.repositories;
 
 import com.projects.projectmanager.project_manager.dto.UserEntityDTO;
+import com.projects.projectmanager.project_manager.entities.Project;
 import com.projects.projectmanager.project_manager.entities.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,4 +17,6 @@ public interface UserEntityRepository extends JpaRepository<UserEntity, Long> {
 
     @Query(value = "SELECT u FROM UserEntity u WHERE u.documentId = :documentId")
     Optional<UserEntity> findByDocumentId(Long documentId);
+
+    Page<UserEntity> findAll(Pageable pageable);
 }

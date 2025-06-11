@@ -5,6 +5,7 @@ import com.projects.projectmanager.project_manager.errors.ResourceNotFoundExcept
 import com.projects.projectmanager.project_manager.services.impl.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +23,25 @@ public class TaskController {
         this.service = service;
     }
 
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<List<TaskDTO>>> getAllTasks() {
+//        List<TaskDTO> listTaskDTO= service.findAll();
+//        return ResponseEntity.ok(new ApiResponse<>("Tasks retrieved successfully", listTaskDTO, HttpStatus.OK));
+//    }
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TaskDTO>>> getAllTasks() {
-        List<TaskDTO> listTaskDTO= service.findAll();
-        return ResponseEntity.ok(new ApiResponse<>("Tasks retrieved successfully", listTaskDTO, HttpStatus.OK));
+    public ResponseEntity<ApiResponse<Page<TaskDTO>>> getAllTasks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<TaskDTO> tasksPage = service.findAll(page, size);
+        ApiResponse<Page<TaskDTO>> response = new ApiResponse<>(
+                "Tasks retrieved successfully",
+                tasksPage, HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping
     public ResponseEntity<ApiResponse<TaskDTO>> create(@Valid @RequestBody TaskDTO taskDTO) {

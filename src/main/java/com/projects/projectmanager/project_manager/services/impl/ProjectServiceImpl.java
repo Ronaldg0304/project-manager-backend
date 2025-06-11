@@ -9,11 +9,13 @@ import com.projects.projectmanager.project_manager.mappers.ProjectMapper;
 import com.projects.projectmanager.project_manager.repositories.CompanyRepository;
 import com.projects.projectmanager.project_manager.repositories.ProjectRepository;
 import com.projects.projectmanager.project_manager.repositories.UserEntityRepository;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -30,14 +32,14 @@ public class ProjectServiceImpl implements ProjectService {
         this.userEntityRepository = userEntityRepository;
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<ProjectDTO> findAll() {
-        List<Project> projectList = (List<Project>) repository.findAll();
-        return projectList.stream()
-                .map(mapper::toDTO)
-                .toList();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<ProjectDTO> findAll() {
+//        List<Project> projectList = (List<Project>) repository.findAll();
+//        return projectList.stream()
+//                .map(mapper::toDTO)
+//                .toList();
+//    }
 
     @Transactional(readOnly = true)
     @Override
@@ -68,4 +70,18 @@ public class ProjectServiceImpl implements ProjectService {
         repository.deleteById(id);
         return optionalProject.map(mapper::toDTO);
     }
+
+    @Override
+    public Page<ProjectDTO> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Project> projects = repository.findAll(pageable);
+
+        List<ProjectDTO> content = projects.getContent().stream()
+                .map(mapper::toDTO)
+                .toList();
+
+        return new PageImpl<>(content, pageable, projects.getTotalElements());
+    }
+
 }

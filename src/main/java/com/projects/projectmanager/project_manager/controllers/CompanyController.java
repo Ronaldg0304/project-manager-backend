@@ -2,10 +2,12 @@ package com.projects.projectmanager.project_manager.controllers;
 
 import com.projects.projectmanager.project_manager.dto.ApiResponse;
 import com.projects.projectmanager.project_manager.dto.CompanyDTO;
+import com.projects.projectmanager.project_manager.dto.ProjectDTO;
 import com.projects.projectmanager.project_manager.errors.ResourceNotFoundException;
 import com.projects.projectmanager.project_manager.services.impl.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +27,23 @@ public class CompanyController {
         this.service = service;
     }
 
+//    @GetMapping
+//    public ResponseEntity<ApiResponse<List<CompanyDTO>>> getAllCompanies() {
+//        List<CompanyDTO> listCompanyDTO = service.findAll();
+//        return ResponseEntity.ok(new ApiResponse<>("Companies retrieved successfully", listCompanyDTO, HttpStatus.OK));
+//    }
+
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CompanyDTO>>> getAllCompanies() {
-        List<CompanyDTO> listCompanyDTO = service.findAll();
-        return ResponseEntity.ok(new ApiResponse<>("Companies retrieved successfully", listCompanyDTO, HttpStatus.OK));
+    public ResponseEntity<ApiResponse<Page<CompanyDTO>>> getAllCompanies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<CompanyDTO> companiesPage = service.findAll(page, size);
+        ApiResponse<Page<CompanyDTO>> response = new ApiResponse<>(
+                "Companies retrieved successfully",
+                companiesPage, HttpStatus.OK
+        );
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
